@@ -38,6 +38,7 @@ class Game extends React.Component {
         this.gameArea = React.createRef();
         this.squareDim = 50;
         this.squareSpeed = 1;
+        this.currentBorderColor = 0;
     }
 
     update() {
@@ -47,7 +48,7 @@ class Game extends React.Component {
         if (Math.random() > 0.9) {
 
             let newSquare = {
-                x: this.getRandomDouble(0, this.gameArea.current.clientWidth - this.squareDim), 
+                x: this.getRandomDouble(0, this.gameArea.clientWidth - this.squareDim), 
                 y: -1, 
                 dim: this.squareDim,
                 color: this.squareColors[this.getRandomInt(0, this.squareColors.length)],
@@ -60,7 +61,7 @@ class Game extends React.Component {
         for (const [key, value] of squares.entries()) {
             value.y += this.squareSpeed;
             
-            if (value.y > this.gameArea.current.clientHeight - this.squareDim) {
+            if (value.y > this.gameArea.clientHeight - this.squareDim) {
                 squares.delete(key);
             } else {
                 squares.set(key, value);
@@ -77,7 +78,21 @@ class Game extends React.Component {
 
     componentDidMount() {
 
+        console.log("game area: " + this.gameArea);
+        
+        document.addEventListener('mousedown', this.handleClick, false);
         this.update();
+    }
+    
+    handleClick = (e) => {
+
+        console.log("game area: " + this.gameArea);
+
+        // check if click outside game area
+        if (!this.gameArea.contains(e.target)) {
+            this.gameArea.style.borderColor = this.squareColors[this.currentBorderColor];
+            this.currentBorderColor = (this.currentBorderColor + 1) % this.squareColors.length;
+        }
     }
 
     cloneMap(map) {
@@ -91,7 +106,7 @@ class Game extends React.Component {
         return newMap;
     }
     
-    handleObjectClick(key) {
+    handleSquareClick(key) {
         
         let squares = this.cloneMap(this.state.squares);
         squares.delete(key);
@@ -113,7 +128,7 @@ class Game extends React.Component {
                     y={square2Render.y}
                     dim={square2Render.dim}
                     color={square2Render.color}
-                    onClick={() => this.handleObjectClick(key)}
+                    onClick={() => this.handleSquareClick(key)}
             />
         );
     }
@@ -139,8 +154,8 @@ class Game extends React.Component {
         }
 
         return (
-            <div ref={this.gameArea} className="game-area">
-                {squareComponents}
+            <div ref={gameArea => this.gameArea = gameArea} className="game-area">
+                {/* {squareComponents} */}
             </div>
         )
     }
