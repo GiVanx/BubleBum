@@ -13,6 +13,7 @@ class Square extends React.Component {
                 top: this.props.y,
                 height: this.props.dim,
                 width: this.props.dim,
+                background: this.props.color,
             }}
         >
             {this.props.value}
@@ -21,7 +22,10 @@ class Square extends React.Component {
     }
 }
 
+
 class Game extends React.Component {
+
+    squareColors = ['blue', 'red', 'yellow'];
 
     constructor(props) {
         super(props);
@@ -33,6 +37,7 @@ class Game extends React.Component {
 
         this.gameArea = React.createRef();
         this.squareDim = 50;
+        this.squareSpeed = 1;
     }
 
     update() {
@@ -41,14 +46,19 @@ class Game extends React.Component {
 
         if (Math.random() > 0.9) {
 
-            let newSquare = {x: this.getRandom(0, this.gameArea.current.clientWidth - this.squareDim), y: -1, dim: this.squareDim};
+            let newSquare = {
+                x: this.getRandomDouble(0, this.gameArea.current.clientWidth - this.squareDim), 
+                y: -1, 
+                dim: this.squareDim,
+                color: this.squareColors[this.getRandomInt(0, this.squareColors.length)],
+            };
             let newSquareId = Math.random();
 
             squares.set(newSquareId, newSquare);
         }
 
         for (const [key, value] of squares.entries()) {
-            value.y += 2;
+            value.y += this.squareSpeed;
             
             if (value.y > this.gameArea.current.clientHeight - this.squareDim) {
                 squares.delete(key);
@@ -95,19 +105,27 @@ class Game extends React.Component {
     renderObject(key) {
 
         let square2Render = this.state.squares.get(key);
+        
         return (
             <Square 
                     key={key}
                     x={square2Render.x}
                     y={square2Render.y}
                     dim={square2Render.dim}
+                    color={square2Render.color}
                     onClick={() => this.handleObjectClick(key)}
             />
         );
     }
 
-    getRandom(min, max) {
+    getRandomDouble(min, max) {
         return Math.random() * (max - min) + min;
+    }
+
+    getRandomInt(min, max) {
+        min = Math.ceil(min);
+        max = Math.floor(max);
+        return Math.floor(Math.random() * (max - min)) + min;
     }
 
     render() {
