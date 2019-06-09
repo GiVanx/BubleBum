@@ -28,6 +28,7 @@ class Game extends React.Component {
     squareColors = ['blue', 'red', 'yellow'];
 
     constructor(props) {
+
         super(props);
 
         this.state = {
@@ -39,13 +40,16 @@ class Game extends React.Component {
         this.squareDim = 50;
         this.squareSpeed = 1;
         this.currentBorderColor = 0;
+        this.squareCountDifficutly = 0.05;
+        console.log("Current square count difficulty: " + (1 - 0.05));
+        this.previousScore = 0;
     }
 
     update() {
 
         let squares = this.cloneMap(this.state.squares);
 
-        if (Math.random() > 0.9) {
+        if (Math.random() > 1 - this.squareCountDifficutly) {
 
             let newSquare = {
                 x: this.getRandomDouble(0, this.gameArea.clientWidth - this.squareDim), 
@@ -68,30 +72,34 @@ class Game extends React.Component {
             }
         }
 
-        this.setState({
-            currentScore: this.currentScore,
-            squares: squares,
-        })
+
+        let state = this.state;
+        state.squares = squares;
+        this.setState(state);
 
         requestAnimationFrame(() => this.update());
     }
 
     componentDidMount() {
 
-        console.log("game area: " + this.gameArea);
-        
         document.addEventListener('mousedown', this.handleClick, false);
+        this.gameArea.style.borderColor = this.squareColors[this.currentBorderColor];
+
         this.update();
     }
     
     handleClick = (e) => {
 
-        console.log("game area: " + this.gameArea);
-
         // check if click outside game area
         if (!this.gameArea.contains(e.target)) {
             this.gameArea.style.borderColor = this.squareColors[this.currentBorderColor];
             this.currentBorderColor = (this.currentBorderColor + 1) % this.squareColors.length;
+        }
+
+        if (this.previousScore === this.state.currentScore - 10) {
+            this.previousScore = this.state.currentScore;
+            this.squareCountDifficutly += 0.002;
+            console.log("Square count difficulty changed (" + (1 - this.squareCountDifficutly) + ")");
         }
     }
 
@@ -115,6 +123,8 @@ class Game extends React.Component {
             currentScore: this.state.currentScore + 1,
             squares: squares,
         });
+
+        console.log("Current score: " + this.state.currentScore);
     }
 
     renderObject(key) {
@@ -155,7 +165,7 @@ class Game extends React.Component {
 
         return (
             <div ref={gameArea => this.gameArea = gameArea} className="game-area">
-                {/* {squareComponents} */}
+                {squareComponents}
             </div>
         )
     }
