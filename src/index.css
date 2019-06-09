@@ -20,6 +20,7 @@ body {
   .square {
     background: #000;
     border: 1px solid #999;
+    position: absolute;
     float: left;
     font-size: 24px;
     font-weight: bold;
@@ -47,5 +48,13 @@ body {
   
   .game-info {
     margin-left: 20px;
+  }
+
+  .game-area {
+    position: relative;
+    border-style: solid;
+    width: 900px;
+    height: 800px;
+    margin: auto;
   }
   

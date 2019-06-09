@@ -9,9 +9,10 @@ class Square extends React.Component {
         return (
         <button className="square" onClick={this.props.onClick} 
             style={{
-                position: "absolute", 
                 left: this.props.x,
                 top: this.props.y,
+                height: this.props.dim,
+                width: this.props.dim,
             }}
         >
             {this.props.value}
@@ -29,6 +30,9 @@ class Game extends React.Component {
             currentScore: 0,
             squares: new Map(),
         };
+
+        this.gameArea = React.createRef();
+        this.squareDim = 50;
     }
 
     update() {
@@ -37,7 +41,7 @@ class Game extends React.Component {
 
         if (Math.random() > 0.9) {
 
-            let newSquare = {x: this.getRandom(0, 600), y: -1};
+            let newSquare = {x: this.getRandom(0, this.gameArea.current.clientWidth - this.squareDim), y: -1, dim: this.squareDim};
             let newSquareId = Math.random();
 
             squares.set(newSquareId, newSquare);
@@ -46,7 +50,7 @@ class Game extends React.Component {
         for (const [key, value] of squares.entries()) {
             value.y += 2;
             
-            if (value.y > 400) {
+            if (value.y > this.gameArea.current.clientHeight - this.squareDim) {
                 squares.delete(key);
             } else {
                 squares.set(key, value);
@@ -67,6 +71,7 @@ class Game extends React.Component {
     }
 
     cloneMap(map) {
+
         let newMap = new Map();
 
         for (const key of map.keys()) {
@@ -88,11 +93,14 @@ class Game extends React.Component {
     }
 
     renderObject(key) {
+
+        let square2Render = this.state.squares.get(key);
         return (
             <Square 
                     key={key}
-                    x={this.state.squares.get(key).x}
-                    y={this.state.squares.get(key).y}
+                    x={square2Render.x}
+                    y={square2Render.y}
+                    dim={square2Render.dim}
                     onClick={() => this.handleObjectClick(key)}
             />
         );
@@ -113,7 +121,7 @@ class Game extends React.Component {
         }
 
         return (
-            <div>
+            <div ref={this.gameArea} className="game-area">
                 {squareComponents}
             </div>
         )
