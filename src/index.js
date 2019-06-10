@@ -49,17 +49,35 @@ class Game extends React.Component {
 
         let squares = this.cloneMap(this.state.squares);
 
-        if (Math.random() > 1 - this.squareCountDifficutly) {
+        // update buckets on first row
+        for (let i = 0; i < this.firstRowBuckets.length; ++i) {
+            if (this.firstRowBuckets[i] !== null && this.firstRowBuckets[i].y > this.squareDim) {
+                this.firstRowBuckets[i] = null;
+                this.countOccupiedBuckets--;
+            }
+        }
+
+        if (Math.random() > 1 - this.squareCountDifficutly && this.countOccupiedBuckets < this.firstRowBuckets.length) {
+
+            // keep searching for an empty first row bucket
+            let newSquareBucket = this.getRandomInt(0, this.firstRowBuckets.length);
+            while (this.firstRowBuckets[newSquareBucket] != null) {
+                newSquareBucket = this.getRandomInt(0, this.firstRowBuckets.length);
+            }
 
             let newSquare = {
-                x: this.getRandomDouble(0, this.gameArea.clientWidth - this.squareDim), 
+                x: newSquareBucket * this.squareDim, 
                 y: -1, 
                 dim: this.squareDim,
                 color: this.squareColors[this.getRandomInt(0, this.squareColors.length)],
             };
+
             let newSquareId = Math.random();
 
             squares.set(newSquareId, newSquare);
+
+            this.firstRowBuckets[newSquareBucket] = newSquare;
+            this.countOccupiedBuckets++;
         }
 
         for (const [key, value] of squares.entries()) {
@@ -71,7 +89,6 @@ class Game extends React.Component {
                 squares.set(key, value);
             }
         }
-
 
         let state = this.state;
         state.squares = squares;
@@ -85,6 +102,10 @@ class Game extends React.Component {
         document.addEventListener('mousedown', this.handleClick, false);
         this.gameArea.style.borderColor = this.squareColors[this.currentBorderColor];
 
+        this.firstRowBuckets = Array(this.gameArea.clientWidth / this.squareDim);
+        this.firstRowBuckets.fill(null);
+        this.countOccupiedBuckets = 0;
+
         this.update();
     }
     
@@ -92,8 +113,8 @@ class Game extends React.Component {
 
         // check if click outside game area
         if (!this.gameArea.contains(e.target)) {
-            this.gameArea.style.borderColor = this.squareColors[this.currentBorderColor];
             this.currentBorderColor = (this.currentBorderColor + 1) % this.squareColors.length;
+            this.gameArea.style.borderColor = this.squareColors[this.currentBorderColor];
         }
 
         if (this.previousScore === this.state.currentScore - 10) {
